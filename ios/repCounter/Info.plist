@@ -56,6 +56,10 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Allow Camera Access</string>
 	<key>NSMicrophoneUsageDescription</key>
-<string>Allow mic access</string>
+	<string>Allow mic access</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Your videos will be saved in the repCount folder</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Your videos will be saved in the repCount folder</string>
 </dict>
 </plist>

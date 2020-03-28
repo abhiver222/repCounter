@@ -17,6 +17,8 @@ import {
   TouchableOpacity
 } from 'react-native';
 
+import CameraRoll from "@react-native-community/cameraroll";
+
 import {
   Header,
   LearnMoreLinks,
@@ -80,7 +82,12 @@ class App extends Component{
 
   constructor(props) {
     super(props);
-    this.state = {text: ''};
+    this.state = {
+      text: '',
+      camera:null,
+      isRecording: false,
+      getReps: false
+    };
   }
 
   render(){
@@ -106,47 +113,12 @@ class App extends Component{
       },
     });
 
-    // return (
-    //   <RNCamera
-    //       ref={ref => {
-    //         this.camera = ref;
-    //       }}
-    //       style={{flex: 1,
-    //       justifyContent: 'flex-end',
-    //       alignItems: 'center'}}
-    //       type={RNCamera.Constants.Type.front}
-    //       flashMode={RNCamera.Constants.FlashMode.on}
-    //
-    //       captureAudio={false}
-    //     >
-    //     {({ camera, status, recordAudioPermissionStatus }) => {
-    //         if (status !== 'READY'){
-    //               return <View
-    //                 style={{
-    //                   flex: 1,
-    //                   backgroundColor: 'lightgreen',
-    //                   justifyContent: 'center',
-    //                   alignItems: 'center',
-    //                 }}
-    //               >
-    //                 <Text>Waiting</Text>
-    //               </View>
-    //         }
-    //
-    //         return (
-    //           <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-    //             <TouchableOpacity onPress={() => this.takePicture(camera)} style={styles.capture}>
-    //               <Text style={{ fontSize: 14 }}> SNAP </Text>
-    //             </TouchableOpacity>
-    //           </View>
-    //         );
-    //       }}
-    //       </RNCamera>
-    //
-    //     );
     return (
       <View style={styles.container}>
         <RNCamera
+          ref={ref => {
+            this.state.camera = ref;
+          }}
           style={styles.preview}
           type={RNCamera.Constants.Type.back}
           flashMode={RNCamera.Constants.FlashMode.on}
@@ -174,15 +146,34 @@ class App extends Component{
                         alignItems: 'center',
                       }}
                     >
-    <Text>Waiting</Text>
-  </View>
+                    <Text>Waiting</Text>
+                  </View>
             }
+            let funcCall
+            let buttonText
+
+
+
             return (
               <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-                <TouchableOpacity onPress={() => this.takePicture(camera)} style={styles.capture}>
-                  <Text style={{ fontSize: 14 }}> SNAP </Text>
-                </TouchableOpacity>
+                {!this.state.isRecording && !this.state.getReps ?
+                <TouchableOpacity onPress={() => this.takeVideo(this.state.camera)} style={styles.capture}>
+                  <Text style={{ fontSize: 14 }}> START </Text>
+                </TouchableOpacity> : null
+                }
+                {this.state.isRecording && !this.state.getReps ?
+                <TouchableOpacity onPress={() => this.stopVideo(this.state.camera)} style={styles.capture}>
+                  <Text style={{ fontSize: 14 }}> STOP </Text>
+                </TouchableOpacity> : null
+                }
+                {this.state.getReps ?
+                <TouchableOpacity onPress={() => this.takeVideo(this.state.camera)} style={styles.capture}>
+                  <Text style={{ fontSize: 14 }}> START </Text>
+                </TouchableOpacity> : null
+                }
+
               </View>
+
             );
           }}
         </RNCamera>
@@ -190,13 +181,42 @@ class App extends Component{
     );
   }
 
-  takePicture = (camera) => {
-      return async function(camera){
-        const options = { quality: 0.5, base64: true };
-        const data = await camera.takePictureAsync(options);
+  takeVideo = (camera) => {
+    this.setState({isRecording: true, getReps: false})
+    return async function(camera){
+
+        // const options = { quality: RNCamera.Constants.VideoQuality.720p }
+        const data = await camera.recordAsync()
         //  eslint-disable-next-line
         console.log(data.uri);
-      }
+        let type = 'video'
+        let album = 'repCounter'
+        CameraRoll.save(data.uri, { type, album })
+
+    }(camera);
+  }
+
+  stopVideo = (camera) => {
+    this.setState({getReps: true, isRecording: false })
+    return async function(camera){
+      camera.stopRecording()
+    }(camera);
+  }
+
+  analyzeVideo = (camera) => {
+    this.setState({getReps: false})
+  }
+
+  takePicture = (camera) => {
+      return async function(camera){
+
+          const options = { quality: 0.5, base64: true };
+          const data = await camera.takePictureAsync(options);
+          //  eslint-disable-next-line
+          console.log(data.uri);
+          CameraRoll.saveToCameraRoll(data.uri)
+
+      }(camera);
 
     }
 
