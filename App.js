@@ -156,21 +156,17 @@ class App extends Component{
 
             return (
               <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-                {!this.state.isRecording && !this.state.getReps ?
+                {!this.state.isRecording ?
                 <TouchableOpacity onPress={() => this.takeVideo(this.state.camera)} style={styles.capture}>
                   <Text style={{ fontSize: 14 }}> START </Text>
                 </TouchableOpacity> : null
                 }
-                {this.state.isRecording && !this.state.getReps ?
+                {this.state.isRecording  ?
                 <TouchableOpacity onPress={() => this.stopVideo(this.state.camera)} style={styles.capture}>
                   <Text style={{ fontSize: 14 }}> STOP </Text>
                 </TouchableOpacity> : null
                 }
-                {this.state.getReps ?
-                <TouchableOpacity onPress={() => this.takeVideo(this.state.camera)} style={styles.capture}>
-                  <Text style={{ fontSize: 14 }}> START </Text>
-                </TouchableOpacity> : null
-                }
+
 
               </View>
 
@@ -182,7 +178,7 @@ class App extends Component{
   }
 
   takeVideo = (camera) => {
-    this.setState({isRecording: true, getReps: false})
+    this.setState({isRecording: true})
     return async function(camera){
 
         // const options = { quality: RNCamera.Constants.VideoQuality.720p }
@@ -196,6 +192,8 @@ class App extends Component{
     }(camera);
   }
 
+  // add something in this function to func to Call
+  // ML models to get reps
   stopVideo = (camera) => {
     this.setState({getReps: true, isRecording: false })
     return async function(camera){
