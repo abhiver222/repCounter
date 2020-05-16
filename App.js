@@ -28,7 +28,51 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import { RNCamera } from 'react-native-camera';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
+import CameraView from './Screens/CameraView'
+import VideoPreview from './Screens/VideoPreview'
+
+
+class App extends Component{
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: '',
+      getReps: false
+    };
+  }
+
+  render(){
+    const styles = StyleSheet.create({
+      container: {
+        flex: 1,
+        flexDirection: 'column',
+        backgroundColor: 'black',
+      }
+    })
+
+    const Stack = createStackNavigator();
+
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+            <Stack.Screen name="Camera" component={CameraView} options={{ title: 'Welcome' }}/>
+            <Stack.Screen name="VideoPreview" component={VideoPreview} options={{ title: 'Analyze' }}/>
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+
+
+};
+
+// <Stack.Screen name="Profile" component={Profile} />
+// <View style={styles.container}>
+//   <CameraView />
+// </View>
 // const App: () => React$Node = () => {
 //   return (
 //     <>
@@ -77,148 +121,6 @@ import { RNCamera } from 'react-native-camera';
 //     </>
 //   );
 // };
-
-class App extends Component{
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      text: '',
-      camera:null,
-      isRecording: false,
-      getReps: false
-    };
-  }
-
-  render(){
-    const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-        flexDirection: 'column',
-        backgroundColor: 'black',
-      },
-      preview: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-      },
-      capture: {
-        flex: 0,
-        backgroundColor: '#fff',
-        borderRadius: 5,
-        padding: 15,
-        paddingHorizontal: 20,
-        alignSelf: 'center',
-        margin: 20,
-      },
-    });
-
-    return (
-      <View style={styles.container}>
-        <RNCamera
-          ref={ref => {
-            this.state.camera = ref;
-          }}
-          style={styles.preview}
-          type={RNCamera.Constants.Type.back}
-          flashMode={RNCamera.Constants.FlashMode.on}
-          captureAudio={false}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-          androidRecordAudioPermissionOptions={{
-            title: 'Permission to use audio recording',
-            message: 'We need your permission to use your audio',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-        >
-          {({ camera, status, recordAudioPermissionStatus }) => {
-            if (status !== 'READY') {
-              return <View
-                      style={{
-                        flex: 1,
-                        backgroundColor: 'lightgreen',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                    <Text>Waiting</Text>
-                  </View>
-            }
-            let funcCall
-            let buttonText
-
-
-
-            return (
-              <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-                {!this.state.isRecording ?
-                <TouchableOpacity onPress={() => this.takeVideo(this.state.camera)} style={styles.capture}>
-                  <Text style={{ fontSize: 14 }}> START </Text>
-                </TouchableOpacity> : null
-                }
-                {this.state.isRecording  ?
-                <TouchableOpacity onPress={() => this.stopVideo(this.state.camera)} style={styles.capture}>
-                  <Text style={{ fontSize: 14 }}> STOP </Text>
-                </TouchableOpacity> : null
-                }
-
-
-              </View>
-
-            );
-          }}
-        </RNCamera>
-      </View>
-    );
-  }
-
-  takeVideo = (camera) => {
-    this.setState({isRecording: true})
-    return async function(camera){
-
-        // const options = { quality: RNCamera.Constants.VideoQuality.720p }
-        const data = await camera.recordAsync()
-        //  eslint-disable-next-line
-        console.log(data.uri);
-        let type = 'video'
-        let album = 'repCounter'
-        CameraRoll.save(data.uri, { type, album })
-
-    }(camera);
-  }
-
-  // add something in this function to func to Call
-  // ML models to get reps
-  stopVideo = (camera) => {
-    this.setState({getReps: true, isRecording: false })
-    return async function(camera){
-      camera.stopRecording()
-    }(camera);
-  }
-
-  analyzeVideo = (camera) => {
-    this.setState({getReps: false})
-  }
-
-  takePicture = (camera) => {
-      return async function(camera){
-
-          const options = { quality: 0.5, base64: true };
-          const data = await camera.takePictureAsync(options);
-          //  eslint-disable-next-line
-          console.log(data.uri);
-          CameraRoll.saveToCameraRoll(data.uri)
-
-      }(camera);
-
-    }
-
-};
 
 // const styles = StyleSheet.create({
 //   scrollView: {
